@@ -1,0 +1,9 @@
+# Dependencies are not installed: this tool has none (Node 24, native fetch)
+node_modules/
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
