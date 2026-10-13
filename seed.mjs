@@ -19,7 +19,11 @@ const OVERDUE_MODE = process.argv.includes('--overdue');
 const COPIES_PER_BOOK = 3;
 const TARGET_LOANS = 15;
 const RETURNS = 5;
-const LIBRARIAN = { username: 'bibliotecario.demo', password: 'Biblio2026-demo', role: 'librarian' };
+const LIBRARIAN = {
+  username: process.env.LIBRARIAN_USERNAME || 'bibliotecario.demo',
+  password: process.env.LIBRARIAN_PASSWORD || 'Biblio2026-demo', // demo-only default; set LIBRARIAN_PASSWORD outside local demos
+  role: 'librarian',
+};
 
 // Business rule codes that mean "already done" or "not allowed right now". They are skipped, not fatal.
 const EXPECTED_CONFLICTS = new Set([
