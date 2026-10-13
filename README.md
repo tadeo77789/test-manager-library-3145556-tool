@@ -48,3 +48,46 @@ No hay prórroga: suban avances parciales con commits pequeños durante la prueb
 | [`test-manager-library-3145556-page`](https://github.com/code-sena/test-manager-library-3145556-page) | Sitio público estático de presentación |
 | [`test-manager-library-3145556-infra`](https://github.com/code-sena/test-manager-library-3145556-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
 | [`test-manager-library-3145556-tool`](https://github.com/code-sena/test-manager-library-3145556-tool) | Utilidades: sembrador de datos de demostración |
+
+---
+
+## Demo seeder (`seed.mjs`)
+
+Loads demonstration data **through the API only** (no SQL). It has **zero dependencies**: it needs Node 24 (native `fetch`).
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `API_URL` | `http://localhost:8000/api/v1` | API base URL |
+| `ADMIN_USERNAME` | (required) | Admin user configured in the API environment |
+| `ADMIN_PASSWORD` | (required) | Admin password configured in the API environment |
+
+```bash
+export ADMIN_USERNAME=admin ADMIN_PASSWORD=...   # PowerShell: $env:ADMIN_USERNAME="admin"
+node seed.mjs
+```
+
+What it creates:
+
+- 48 books with 13-digit ISBNs (valid check digit), spread over the five categories, 3 copies each.
+- 10 members.
+- 1 librarian (`bibliotecario.demo`).
+- 15 loans (one book each, no member above 3 open books) and 5 returned items.
+
+The seeder is re-runnable: business conflicts (`ISBN_TAKEN`, `DOCUMENT_TAKEN`, `USERNAME_TAKEN`, `MEMBER_HAS_OVERDUE`, `BOOK_NOT_AVAILABLE`, ...) are reported and skipped. Other errors stop the run.
+
+### Overdue loans
+
+The API sets `loaned_at` to the current time, plus the `CLOCK_OFFSET_DAYS` offset. Loans are due 14 days after `loaned_at`, so a loan created with an offset of `-20` is already overdue in real time.
+
+1. Start the API with `CLOCK_OFFSET_DAYS=-20`.
+2. Run `node seed.mjs --overdue`. This creates 3 loans that become overdue.
+3. Restart the API with `CLOCK_OFFSET_DAYS=0`.
+4. Run `node seed.mjs`. This completes the demo data.
+
+After step 4, `GET /loans/overdue` returns the 3 overdue lines.
+
+## Status
+
+| Task | Status | Evidence |
+|---|---|---|
+| T-21 demo seeder through the API (>= 40 books, 10 members, >= 15 loans, 3 overdue) | Partial | `node --check seed.mjs` passes; end-to-end run pending the API container |
