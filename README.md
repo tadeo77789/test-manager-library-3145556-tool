@@ -90,4 +90,23 @@ After step 4, `GET /loans/overdue` returns the 3 overdue lines.
 
 | Task | Status | Evidence |
 |---|---|---|
-| T-21 demo seeder through the API (>= 40 books, 10 members, >= 15 loans, 3 overdue) | Done | Run against the real API (13-oct, ~15:00): `node seed.mjs` → 48 books, 10 members, 1 librarian, 15 loans, 5 items returned. Overdue flow (`CLOCK_OFFSET_DAYS=-20`, `node seed.mjs --overdue`, back to 0) → `GET /loans/overdue` returns 3 lines (`days_late` 7); the most-borrowed report has rows. RNF-1 load test not run. |
+| T-21 demo seeder through the API (>= 40 books, 10 members, >= 15 loans, 3 overdue) | Done | Run against the real API (13-oct, ~15:00): `node seed.mjs` → 48 books, 10 members, 1 librarian, 15 loans, 5 items returned. Overdue flow (`CLOCK_OFFSET_DAYS=-20`, `node seed.mjs --overdue`, back to 0) → `GET /loans/overdue` returns 3 lines (`days_late` 7); the most-borrowed report has rows. RNF-1 load test: see below. |
+
+## RNF-1 load test
+
+`load-rnf1.mjs` (Node 24, no dependencies, API only) fills the catalog up to `TARGET_BOOKS` (default 5 000) with 10 concurrent workers, tolerating `409 ISBN_TAKEN`, and then measures `GET /books` (with `q`, with `category_id`, and plain; 50 sequential requests each, after one warm-up request) against the 300 ms target (judged on p95).
+
+```bash
+export ADMIN_USERNAME=admin ADMIN_PASSWORD=...
+node load-rnf1.mjs
+```
+
+Result (13-oct, ~15:45, full compose stack on a laptop, Docker Desktop, API served by `artisan serve` with 4 workers, 5 009 books):
+
+| Scenario | p50 (ms) | p95 (ms) | max (ms) | Target |
+|---|---|---|---|---|
+| `q` (title search, ~5 000 matches) | 21.9 | 24.1 | 25.9 | PASS (< 300) |
+| `category_id` | 15.4 | 16.1 | 18.0 | PASS (< 300) |
+| plain | 17.6 | 18.6 | 19.5 | PASS (< 300) |
+
+Fill step: 4 961 books created in 19.1 s (the target is checked by workers without a lock, so it can overshoot by a few books). Limits: sequential requests only, local network, no other load on the API. The test data stays in the database of that run (books titled `Carga ...`).
