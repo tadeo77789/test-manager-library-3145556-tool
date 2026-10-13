@@ -90,4 +90,4 @@ After step 4, `GET /loans/overdue` returns the 3 overdue lines.
 
 | Task | Status | Evidence |
 |---|---|---|
-| T-21 demo seeder through the API (>= 40 books, 10 members, >= 15 loans, 3 overdue) | Partial | `node --check seed.mjs` passes; end-to-end run pending the API container |
+| T-21 demo seeder through the API (>= 40 books, 10 members, >= 15 loans, 3 overdue) | Done | Run against the real API (13-oct, ~15:00): `node seed.mjs` → 48 books, 10 members, 1 librarian, 15 loans, 5 items returned. Overdue flow (`CLOCK_OFFSET_DAYS=-20`, `node seed.mjs --overdue`, back to 0) → `GET /loans/overdue` returns 3 lines (`days_late` 7); the most-borrowed report has rows. RNF-1 load test not run. |
