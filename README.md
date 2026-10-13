@@ -105,7 +105,7 @@ Result (13-oct, ~15:45, full compose stack on a laptop, Docker Desktop, API serv
 
 | Scenario | p50 (ms) | p95 (ms) | max (ms) | Target |
 |---|---|---|---|---|
-| `q` (title search, ~5 000 matches) | 21.9 | 24.1 | 25.9 | PASS (< 300) |
+| `q` (title search "Carga Luna", 414 matches) | 21.9 | 24.1 | 25.9 | PASS (< 300) |
 | `category_id` | 15.4 | 16.1 | 18.0 | PASS (< 300) |
 | plain | 17.6 | 18.6 | 19.5 | PASS (< 300) |
 
